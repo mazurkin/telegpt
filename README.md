@@ -10,6 +10,9 @@
 ```shell
 export TELEGPT_APP_ID='your-app-id'
 export TELEGPT_APP_HASH='your-app-hash'
+````
+
+```shell
 export TELEGPT_PHONE='your-account-phone-number'
 export TELEGPT_CHAT='chat-name'
 ```
@@ -30,7 +33,8 @@ make env-create
 ### run
 
 ```shell
-bin/telegpt.sh --app-id=XXX --app-hash=XXX --app-phone=XXX --chat=XXXX --date=2025-01-09
+bin/telegpt.sh                    # summary for this day
+bin/telegpt.sh --date=2025-01-09  # summary for the specific day
 ```
 
 ## docker way
