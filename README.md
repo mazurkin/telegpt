@@ -4,6 +4,7 @@
 
 1. Install Conda
 2. Register your own application https://core.telegram.org/api/obtaining_api_id#obtaining-api-id
+3. Create Google Gemini API key https://aistudio.google.com/app/apikey
 
 ## environment variables
 
