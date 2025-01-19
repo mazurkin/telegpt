@@ -4,7 +4,7 @@
 
 1. Install Conda or Docker or both
 2. Register your own Telegram client application https://core.telegram.org/api/obtaining_api_id#obtaining-api-id
-3. Install the local Ollama server https://ollama.com/ and pull the required model (phi4:14b) 
+3. Install the local Ollama server https://ollama.com/ and pull the required model (phi4:14b)
 
 ## environment variables
 
