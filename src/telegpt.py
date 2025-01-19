@@ -16,9 +16,7 @@ import google.generativeai as genai
 
 class TeleGptApplication:
 
-    GROUP_ID: int = -1001499661024
-
-    TIMEZONE: pytz.tzinfo = pytz.timezone(tzlocal.get_localzone_name())  # pytz.timezone('US/Eastern')
+    TIMEZONE: pytz.tzinfo = pytz.timezone(tzlocal.get_localzone_name())
 
     MESSAGE_LIMIT: int = 2500
 
@@ -26,7 +24,7 @@ class TeleGptApplication:
 
     def __init__(self):
         # moment when the application has started
-        self.started: datetime.datetime = datetime.datetime.now(tz=pytz.timezone('US/Eastern'))
+        self.started: datetime.datetime = datetime.datetime.now(tz=self.TIMEZONE)
 
         # script path
         self.app_src_path: pathlib.Path = pathlib.Path(__file__)
@@ -81,7 +79,7 @@ class TeleGptApplication:
             app_hash = os.environ['TELEGPT_APP_HASH']
 
         if not app_phone:
-            app_phone = os.environ['TELEGPT_APP_PHONE']
+            app_phone = os.environ['TELEGPT_PHONE']
 
         if not chat:
             chat = os.environ['TELEGPT_CHAT']
@@ -92,7 +90,7 @@ class TeleGptApplication:
         conversation: t.List[str] = self.fetch(app_id, app_hash, app_phone, chat, date)
 
         response = self.contextualize(conversation)
-        logging.info('Response is:\n%s', response)
+        logging.info('TELEGPT(chat: "%s", day: "%s"):\n\n%s', chat, date, response)
 
     def fetch(self, app_id: int, app_hash: str, app_phone: str, chat: str, date: str) -> t.List[str]:
         client = telethon.TelegramClient(
@@ -130,7 +128,7 @@ class TeleGptApplication:
 
             # fetch all messages
             messages = client.iter_messages(
-                entity=self.GROUP_ID,
+                entity=chat_id,
                 limit=self.MESSAGE_LIMIT,
                 offset_date=date_offset,
                 reverse=True,
@@ -139,6 +137,9 @@ class TeleGptApplication:
             async for message in messages:
                 if not message.text:
                     continue
+                if 'TELEGPT' in message.text:
+                    continue
+
                 message_text = message.text.replace('\n', ' ').replace('\r', '')
 
                 message_date: datetime.datetime = message.date.astimezone(self.TIMEZONE)
@@ -177,18 +178,18 @@ class TeleGptApplication:
         Below this prompt after an empty line goes the conversation between friends in form of multiple lines.
         Every line represents one messages, first goes the author name in quotes
         and then after semicolon goes the message of this author. The messages are usually short
-        and sometimes they are response to the previous messages.
-        Sometimes slang and some specific terminology are used. Having all these answer the following questions:
+        and sometimes they could be a response to some of the previous messages.
+        Sometimes slang and some specific terminology is used. Answer the following questions:
         What topics are discussed in this conversation?
         How is the most active author?
-        Is there any kind profanity and aggression language used?
-        Is there any hot topic the most of people discussed and which can bring attention?
-        List all the web links in the conversation?
-        Has been Hitler mentioned and who has mention him?
+        Is there any kind profanity and aggressive language used?
+        Is there any hot topic the most of people had discussed?
+        List all the full web links mentioned in the conversation?
         Is there any discussion of politics in USA?
         Is there any discussion of politics in Russia?
         Is there any discussion of politics in general?
         Did anyone mention USA as a country or any city in USA in negative context?
+        Has been Hitler mentioned and who has mention him?
         """
 
         content = '\n'.join(conversation)

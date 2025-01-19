@@ -11,6 +11,9 @@ ROOT  := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 CONDA_ENV_NAME = telegpt
 
+DOCKER_NAME=telegpt
+DOCKER_VERSION=0.1
+
 # -----------------------------------------------------------------------------
 # notebook
 # -----------------------------------------------------------------------------
@@ -53,3 +56,51 @@ env-shell:
 env-info:
 	@conda run --no-capture-output --live-stream --name $(CONDA_ENV_NAME) conda info
 
+# -----------------------------------------------------------------------------
+# docker image
+# -----------------------------------------------------------------------------
+
+.PHONY: docker-prune
+docker-prune:
+	@docker image prune --force
+
+.PHONY: docker-build
+docker-build:
+	@docker build --progress=plain -t ${DOCKER_NAME}:${DOCKER_VERSION} .
+
+.PHONY: docker-run
+docker-run:
+	@docker run \
+		--name "telegpt" \
+		--hostname="telegpt" \
+		--rm \
+		--read-only \
+		--interactive \
+		--tty \
+		--env TELEGPT_APP_ID \
+		--env TELEGPT_APP_HASH \
+		--env TELEGPT_PHONE \
+		--env TELEGPT_CHAT \
+		--env GOOGLE_AI_KEY \
+		--env TZ=US/Eastern \
+		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
+		${DOCKER_NAME}:${DOCKER_VERSION}
+
+.PHONY: docker-shell
+docker-shell:
+	@docker run \
+		--name "telegpt" \
+		--hostname="telegpt" \
+		--rm \
+		--read-only \
+		--interactive \
+		--tty \
+		--env TELEGPT_APP_ID \
+		--env TELEGPT_APP_HASH \
+		--env TELEGPT_PHONE \
+		--env TELEGPT_CHAT \
+		--env GOOGLE_AI_KEY \
+		--env TZ=US/Eastern \
+		--entrypoint /bin/bash \
+		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
+		${DOCKER_NAME}:${DOCKER_VERSION}
