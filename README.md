@@ -25,5 +25,5 @@ make env-create
 ## run
 
 ```shell
-make run
+bin/telegpt.sh --app-id=XXX --app-hash=XXX --app-phone=XXX --chat=XXXX --date=2025-01-09
 ```
