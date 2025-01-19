@@ -17,5 +17,5 @@ Question: List all the full web links mentioned in this conversation?
 Question: Is there any discussion of politics in USA in this conversation?
 Question: Is there any discussion of politics in Russia in this conversation?
 Question: Is there any discussion of politics in general in this conversation?
-Question: Did anyone mention USA as a country or any city in USA in negative context in this conversation?
+Question: Did anyone mention USA as a country or any city in the USA in negative context in this conversation?
 Question: Has been Hitler mentioned and who has mentioned him in this conversation?
