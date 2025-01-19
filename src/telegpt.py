@@ -11,7 +11,6 @@ import yaml
 import telethon
 import datetime
 
-import google.generativeai as genai
 import ollama
 
 
@@ -107,7 +106,7 @@ class TeleGptApplication:
                 await client.sign_in(app_phone, input('Enter the code: '))
 
             profile = await client.get_me()
-            logging.info(f'Logged in as [%s %s %s]', profile.first_name, profile.last_name, profile.phone)
+            logging.info('Logged in as [%s %s %s]', profile.first_name, profile.last_name, profile.phone)
 
             # fetch all dialogs
             chat_id: t.Optional[int] = None

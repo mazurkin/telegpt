@@ -57,6 +57,22 @@ env-info:
 	@conda run --no-capture-output --live-stream --name $(CONDA_ENV_NAME) conda info
 
 # -----------------------------------------------------------------------------
+# linters
+# -----------------------------------------------------------------------------
+
+.PHONY: shellcheck
+shellcheck:
+	@shellcheck --norc --shell=bash bin/*
+
+.PHONY: lint-flake8
+lint-flake8:
+	@conda run --no-capture-output --live-stream --name $(CONDA_ENV_NAME) \
+		flake8 src
+
+.PHONY: lint
+lint: shellcheck lint-flake8
+
+# -----------------------------------------------------------------------------
 # docker image
 # -----------------------------------------------------------------------------
 
@@ -65,7 +81,7 @@ docker-prune:
 	@docker image prune --force
 
 .PHONY: docker-build
-docker-build:
+docker-build: lint
 	@docker build --progress=plain -t ${DOCKER_NAME}:${DOCKER_VERSION} .
 
 .PHONY: docker-run
