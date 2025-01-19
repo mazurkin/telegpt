@@ -20,7 +20,7 @@ class TeleGptApplication:
 
     TIMEZONE: pytz.tzinfo = pytz.timezone(tzlocal.get_localzone_name())  # pytz.timezone('US/Eastern')
 
-    MESSAGE_LIMIT: int = 1000
+    MESSAGE_LIMIT: int = 2500
 
     GEMINI_MODEL: str = 'gemini-1.5-flash'
 
