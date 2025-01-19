@@ -185,12 +185,7 @@ class TeleGptApplication:
 
         model = genai.GenerativeModel(self.LLM_MODEL)
 
-        response: ollama.ChatResponse = ollama.generate(
-            model=self.LLM_MODEL,
-            prompt=query,
-            options=options,
-            system=system,
-        )
+        response = model.generate_content(query, safety_settings='BLOCK_NONE')
 
         return response.text
 
