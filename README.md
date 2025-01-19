@@ -1,5 +1,8 @@
 # telegpt
 
+The example of a command-line client for Telegram. This client fetched the history of the messages on one single day
+and makes the summary of conversation.
+
 ## prerequisites
 
 1. Install Conda or Docker or both

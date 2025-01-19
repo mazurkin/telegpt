@@ -58,6 +58,7 @@ class TeleGptApplication:
     @argh.arg('--app-id', type=str, required=False, help='application identifier')
     @argh.arg('--app-hash', type=str, required=False, help='application hash')
     @argh.arg('--app-phone', type=str, required=False, help='application phone')
+    @argh.arg('--prompt', type=str, required=False, help='the name of the prompt file')
     @argh.arg('--chat', type=str, required=False, help='chat name')
     @argh.arg('--date', type=str, required=False, help='chat date')
     def main(self,
@@ -66,10 +67,12 @@ class TeleGptApplication:
              app_phone: t.Optional[str] = None,
              chat: t.Optional[str] = None,
              date: t.Optional[str] = None,
+             prompt: str = 'example.txt',
              ):
         # log the arguments
         logging.info('Using arguments: %s', sys.argv)
         logging.info('Using timezone: %s', self.TIMEZONE)
+        logging.info('Using prompt: %s', prompt)
 
         # lookup for the default values for the parameters
         if not app_id:
@@ -89,7 +92,7 @@ class TeleGptApplication:
 
         conversation: t.List[str] = self.fetch(app_id, app_hash, app_phone, chat, date)
 
-        response = self.contextualize(conversation)
+        response = self.contextualize(prompt, conversation)
         logging.info('TELEGPT(chat: "%s", day: "%s"):\n\n%s', chat, date, response)
 
     def fetch(self, app_id: int, app_hash: str, app_phone: str, chat: str, date: str) -> t.List[str]:
@@ -171,36 +174,23 @@ class TeleGptApplication:
 
         return conversation
 
-    def contextualize(self, conversation: t.List[str]) -> str:
+    def contextualize(self, prompt_file: str, conversation: t.List[str]) -> str:
         content = '\n'.join(conversation)
 
-        query = f"""
-        Conversation is a plain text in form of multiple lines.
-        Every line represents one single messages. In each line first goes the author name in quotes
-        and then after semicolon goes the message of this author.
-        The messages are usually short and sometimes they could be a response to some of the previous messages.
-        Sometimes slang and some specific terminology is used.
-        You must make honest and precise analysis of this conversation, show some direct quotes from the conversation.
-        The conversation starts from the next line and the questions come after the conversation.
+        prompt_file_path: pathlib.Path = self.pkg_dir_path.joinpath('prompt').joinpath(prompt_file)
+        with open(prompt_file_path, 'tr') as f:
+            prompt_text = f.read()
 
-        {content}
-
-        Question: What are the topics discussed in this conversation, explain in details?
-        Question: Who is the most active author in this conversation?
-        Question: Who from the authors has made more comments than the others?
-        Question: Is there any kind of profanity or aggressive, sarcastic, rude language used in this conversation?
-        Question: Is there any hot topic the most of people had discussed in this conversation?
-        Question: List all the full web links mentioned in this conversation?
-        Question: Is there any discussion of politics in USA in this conversation?
-        Question: Is there any discussion of politics in Russia in this conversation?
-        Question: Is there any discussion of politics in general in this conversation?
-        Question: Did anyone mention USA as a country or any city in USA in negative context in this conversation?
-        Question: Has been Hitler mentioned and who has mentioned him in this conversation?
-        """
+        query = prompt_text.format(content=content)
 
         model = genai.GenerativeModel(self.LLM_MODEL)
 
-        response = model.generate_content(query, safety_settings='BLOCK_NONE')
+        response: ollama.ChatResponse = ollama.generate(
+            model=self.LLM_MODEL,
+            prompt=query,
+            options=options,
+            system=system,
+        )
 
         return response.text
 

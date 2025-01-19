@@ -37,6 +37,7 @@ ENV PYTHONUNBUFFERED=1
 # files
 COPY bin /opt/telegpt/bin
 COPY src /opt/telegpt/src
+COPY src /opt/telegpt/prompt
 
 # for some reason the base container doesn't set `${USER}` variable, and `source ...` fails in BASH
 ENV USER="conda"
