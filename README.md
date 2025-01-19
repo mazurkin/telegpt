@@ -2,7 +2,7 @@
 
 ## prerequisites
 
-1. Install Conda
+1. Install Conda or Docker or both
 2. Register your own Telegram client application https://core.telegram.org/api/obtaining_api_id#obtaining-api-id
 3. Create Google Gemini API key https://aistudio.google.com/app/apikey
 
