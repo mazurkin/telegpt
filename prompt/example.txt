@@ -12,10 +12,10 @@ Question: What are the topics discussed in this conversation, explain in details
 Question: Who is the most active author in this conversation?
 Question: Who from the authors has made more comments than the others?
 Question: Is there any kind of profanity or aggressive, sarcastic, rude language used in this conversation?
-Question: Is there any hot topic the most of people had discussed in this conversation?
+Question: Is there any hot topic the most of the people had discussed in this conversation?
 Question: List all the full web links mentioned in this conversation?
-Question: Is there any discussion of politics in USA in this conversation?
+Question: Is there any discussion of politics in the USA in this conversation?
 Question: Is there any discussion of politics in Russia in this conversation?
 Question: Is there any discussion of politics in general in this conversation?
-Question: Did anyone mention USA as a country or any city in USA in negative context in this conversation?
+Question: Did anyone mention USA as a country or any city in the USA in negative context in this conversation?
 Question: Has been Hitler mentioned and who has mentioned him in this conversation?
