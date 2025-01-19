@@ -21,7 +21,7 @@ class TeleGptApplication:
 
     MESSAGE_LIMIT: int = 2500
 
-    LLM_MODEL: str = 'phi4:14b'
+    LLM_MODEL: str = 'gemini-1.5-pro'
 
     def __init__(self):
         # moment when the application has started
@@ -40,6 +40,9 @@ class TeleGptApplication:
 
         # init logging
         self.init_logging()
+
+        # initialize genai client settings
+        genai.configure(api_key=os.environ["GOOGLE_AI_KEY"], transport='rest')
 
     def init_logging(self):
         # load logging configuration
@@ -175,26 +178,28 @@ class TeleGptApplication:
         Every line represents one messages, first goes the author name in quotes
         and then after semicolon goes the message of this author. The messages are usually short
         and sometimes they could be a response to some of the previous messages.
-        Sometimes slang and some specific terminology is used. Answer the following questions.
-        Use English language for the answers.
-
+        Sometimes slang and some specific terminology is used. Answer the following questions using English language.
         What topics are discussed in this conversation?
+        How is the most active author?
+        Is there any kind profanity and aggressive language used?
+        Is there any hot topic the most of people had discussed?
+        List all the full web links mentioned in the conversation?
+        Is there any discussion of politics in USA?
+        Is there any discussion of politics in Russia?
+        Is there any discussion of politics in general?
+        Did anyone mention USA as a country or any city in USA in negative context?
+        Has been Hitler mentioned and who has mention him?
         """
 
         content = '\n'.join(conversation)
 
-        response: ollama.ChatResponse = ollama.chat(model=self.LLM_MODEL, messages=[
-            {
-                'role': 'system',
-                'content': prompt,
-            },
-            {
-                'role': 'user',
-                'content': content,
-            },
-        ])
+        model = genai.GenerativeModel(self.LLM_MODEL)
 
-        return response.message.content
+        query = f'{prompt}\n\n{content}'
+
+        response = model.generate_content(query, safety_settings='BLOCK_NONE')
+
+        return response.text
 
 
 if __name__ == '__main__':

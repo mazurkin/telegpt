@@ -11,7 +11,7 @@ ROOT  := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 CONDA_ENV_NAME = telegpt
 
-DOCKER_NAME=telegpt
+DOCKER_NAME=telegpt-gemini
 DOCKER_VERSION=0.1
 
 # -----------------------------------------------------------------------------
@@ -82,6 +82,7 @@ docker-run:
 		--env TELEGPT_APP_HASH \
 		--env TELEGPT_PHONE \
 		--env TELEGPT_CHAT \
+		--env GOOGLE_AI_KEY \
 		--env TZ=US/Eastern \
 		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
 		${DOCKER_NAME}:${DOCKER_VERSION}
@@ -100,6 +101,7 @@ docker-shell:
 		--env TELEGPT_APP_HASH \
 		--env TELEGPT_PHONE \
 		--env TELEGPT_CHAT \
+		--env GOOGLE_AI_KEY \
 		--env TZ=US/Eastern \
 		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
 		--entrypoint /bin/bash \
