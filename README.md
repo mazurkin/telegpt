@@ -4,7 +4,7 @@
 
 1. Install Conda or Docker or both
 2. Register your own Telegram client application https://core.telegram.org/api/obtaining_api_id#obtaining-api-id
-3. Install the local Ollama server https://ollama.com/ and pull the required model from the remote repository
+3. Create Google Gemini API key https://aistudio.google.com/app/apikey
 
 ## environment variables
 
@@ -16,6 +16,10 @@ export TELEGPT_APP_HASH='your-app-hash'
 ```shell
 export TELEGPT_PHONE='your-account-phone-number'
 export TELEGPT_CHAT='chat-name'
+```
+
+```shell
+export GOOGLE_AI_KEY='access-key-to-google-gemini'
 ```
 
 ## conda way
