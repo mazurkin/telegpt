@@ -77,11 +77,11 @@ docker-run:
 		--read-only \
 		--interactive \
 		--tty \
+		--network host \
 		--env TELEGPT_APP_ID \
 		--env TELEGPT_APP_HASH \
 		--env TELEGPT_PHONE \
 		--env TELEGPT_CHAT \
-		--env GOOGLE_AI_KEY \
 		--env TZ=US/Eastern \
 		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
 		${DOCKER_NAME}:${DOCKER_VERSION}
@@ -95,12 +95,12 @@ docker-shell:
 		--read-only \
 		--interactive \
 		--tty \
+		--network host \
 		--env TELEGPT_APP_ID \
 		--env TELEGPT_APP_HASH \
 		--env TELEGPT_PHONE \
 		--env TELEGPT_CHAT \
-		--env GOOGLE_AI_KEY \
 		--env TZ=US/Eastern \
-		--entrypoint /bin/bash \
 		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
+		--entrypoint /bin/bash \
 		${DOCKER_NAME}:${DOCKER_VERSION}

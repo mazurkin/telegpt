@@ -18,6 +18,9 @@ tzlocal = "5.2"
 google-generativeai = "0.8.3"
 grpcio = "1.69.0"
 
+[tool.poetry.group.ollama.dependencies]
+ollama = "0.4.6"
+
 [tool.poetry.group.dev.dependencies]
 flake8 = "7.1.1"
 
