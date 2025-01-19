@@ -11,7 +11,7 @@ import yaml
 import telethon
 import datetime
 
-import ollama
+import google.generativeai as genai
 
 
 class TeleGptApplication:
