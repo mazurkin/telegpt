@@ -1,7 +1,9 @@
 # telegpt
 
-The example of a command-line client for Telegram. This client fetched the history of the messages on one single day
-and makes the summary of conversation.
+The example of a command-line client for Telegram (this is not a Telegram bot).
+
+The client fetches the history of the messages from the specified char for one single day
+and makes the summary of conversation using LLM model.
 
 ## prerequisites
 
