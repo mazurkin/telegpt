@@ -170,30 +170,50 @@ class TeleGptApplication:
 
     def contextualize(self, conversation: t.List[str]) -> str:
         prompt = """
-        Uses specifies the conversation between friends in form of multiple lines.
-        Every line represents one messages, first goes the author name in quotes
-        and then after semicolon goes the message of this author. The messages are usually short
-        and sometimes they could be a response to some of the previous messages.
-        Sometimes slang and some specific terminology is used. Answer the following questions.
-        Use English language for the answers.
-
-        What topics are discussed in this conversation?
+        You are the expert who analyses conversation between multiple friends.
+        You will be questioned with questions. You have to answer every question in the most detailed way quoting
+        the original text from the conversation.
+        Answer all questions in English language.
         """
 
         content = '\n'.join(conversation)
 
-        response: ollama.ChatResponse = ollama.chat(model=self.LLM_MODEL, messages=[
-            {
-                'role': 'system',
-                'content': prompt,
-            },
-            {
-                'role': 'user',
-                'content': content,
-            },
-        ])
+        query = f"""
+        Conversation is a plain text in form of multiple lines.
+        Every line represents one single messages. In each line first goes the author name in quotes
+        and then after semicolon goes the message of this author.
+        The messages are usually short and sometimes they could be a response to some of the previous messages.
+        Sometimes slang and some specific terminology is used.
+        You must make honest and precise analysis of this conversation, show some direct quotes from the conversation.
+        The conversation starts from the next line and the questions come after the conversation.
 
-        return response.message.content
+        {content}
+
+        Question: What are the topics discussed in this conversation, explain in details?
+        Question: Who is the most active author in this conversation?
+        Question: Who from the authors has made more comments than the others?
+        Question: Is there any kind of profanity or aggressive, sarcastic, rude language used in this conversation?
+        Question: Is there any hot topic the most of people had discussed in this conversation?
+        Question: List all the full web links mentioned in this conversation?
+        Question: Is there any discussion of politics in USA in this conversation?
+        Question: Is there any discussion of politics in Russia in this conversation?
+        Question: Is there any discussion of politics in general in this conversation?
+        Question: Did anyone mention USA as a country or any city in USA in negative context in this conversation?
+        Question: Has been Hitler mentioned and who has mentioned him in this conversation?
+        """
+
+        options: t.Dict = {
+            'temperature': 0.1,
+        }
+
+        response: ollama.ChatResponse = ollama.generate(
+            model=self.LLM_MODEL,
+            prompt=query,
+            options=options,
+            system=prompt,
+        )
+
+        return response.response
 
 
 if __name__ == '__main__':
