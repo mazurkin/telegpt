@@ -22,6 +22,13 @@ class TeleGptApplication:
 
     LLM_MODEL: str = 'phi4:14b'
 
+    SYSTEM_PROMPT: str = """
+    You are the expert who analyses conversation between friends.
+    You will be questioned with questions.
+    You have to answer every question in the most detailed way quoting the original text from the conversation.
+    Answer all questions in English language.
+    """
+
     def __init__(self):
         # moment when the application has started
         self.started: datetime.datetime = datetime.datetime.now(tz=self.TIMEZONE)
@@ -221,13 +228,6 @@ class TeleGptApplication:
         if not conversation:
             return 'There is no any conversation today in the chat!'
 
-        system = """
-        You are the expert who analyses conversation between friends.
-        You will be questioned with questions.
-        You have to answer every question in the most detailed way quoting the original text from the conversation.
-        Answer all questions in English language.
-        """
-
         content = '\n'.join(conversation)
 
         prompt_file_path: pathlib.Path = self.pkg_dir_path.joinpath('prompt').joinpath(prompt_file)
@@ -244,7 +244,7 @@ class TeleGptApplication:
             model=self.LLM_MODEL,
             prompt=query,
             options=options,
-            system=system,
+            system=self.SYSTEM_PROMPT,
         )
 
         return response.response
