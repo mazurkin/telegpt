@@ -14,6 +14,7 @@ Question: Who from the authors has made more comments than the others?
 Question: Is there any kind of profanity or aggressive, sarcastic, rude language used in this conversation?
 Question: Is there any hot topic the most of the people had discussed in this conversation?
 Question: List all the full web links mentioned in this conversation?
+Question: Is there any discussion of technology or programming in this conversation?
 Question: Is there any discussion of politics in the USA in this conversation?
 Question: Is there any discussion of politics in Russia in this conversation?
 Question: Is there any discussion of politics in general in this conversation?
