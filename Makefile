@@ -22,7 +22,7 @@ DOCKER_VERSION=0.1
 
 .PHONY: run
 run:
-	$(ROOT)/bin/telegpt.sh
+	@bin/telegpt.sh
 
 # -----------------------------------------------------------------------------
 # conda environment
