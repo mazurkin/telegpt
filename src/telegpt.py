@@ -218,6 +218,9 @@ class TeleGptApplication:
             return 'unknown'
 
     def summarize_conversation(self, prompt_file: str, conversation: t.List[str]) -> str:
+        if not conversation:
+            return 'There is no any conversation today in the chat!'
+
         system = """
         You are the expert who analyses conversation between friends.
         You will be questioned with questions.
