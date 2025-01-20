@@ -2,7 +2,7 @@
 
 The example of a command-line client for Telegram (this is not a Telegram bot).
 
-The client fetches the history of the messages from the specified char for one single day
+The client fetches the history of the messages from the chat for the period
 and makes the summary of conversation using LLM model.
 
 ## prerequisites
@@ -39,8 +39,11 @@ make env-create
 ### run
 
 ```shell
-bin/telegpt.sh                    # summary for this day
-bin/telegpt.sh --date=2025-01-09  # summary for the specific day
+# summary for this day
+bin/telegpt.sh --chat=mychat --prompt=example.txt
+
+# summary for the specific day
+bin/telegpt.sh --chat=mychat --prompt=example.txt --date=2025-01-09
 ```
 
 ## docker way

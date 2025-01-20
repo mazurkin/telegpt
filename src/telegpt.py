@@ -18,7 +18,7 @@ class TeleGptApplication:
 
     TIMEZONE: pytz.tzinfo = pytz.timezone(tzlocal.get_localzone_name())
 
-    MESSAGE_LIMIT: int = 2500
+    MESSAGE_LIMIT: int = 1000
 
     LLM_MODEL: str = 'gemini-1.5-pro'
 
@@ -67,7 +67,7 @@ class TeleGptApplication:
     @argh.arg('--phone', type=str, required=False, help='the phone number of the Telegram account')
     @argh.arg('--prompt', type=str, required=False, help='the name of the prompt file')
     @argh.arg('--chat', type=str, required=False, help='chat name')
-    @argh.arg('--date', type=str, required=False, help='chat date (2025-01-01)')
+    @argh.arg('--date', type=str, required=False, help='chat date (for example "2025-01-01"')
     def main(self,
              app_id: t.Optional[int] = None,
              app_hash: t.Optional[str] = None,
@@ -136,7 +136,7 @@ class TeleGptApplication:
         chat_id: t.Optional[int] = None
 
         async for dialog in client.iter_dialogs():
-            logging.debug('dialog [%s]=%s', dialog.name, dialog.id)
+            logging.debug('dialog %s: %s', dialog.id, dialog.name)
 
             if dialog.name == chat:
                 chat_id = dialog.id
@@ -149,14 +149,14 @@ class TeleGptApplication:
         date_offset = self.TIMEZONE.localize(date_offset)
 
         # fetch all messages
+        conversation: t.List[str] = []
+
         messages: t.AsyncIterator = client.iter_messages(
             entity=chat_id,
             limit=self.MESSAGE_LIMIT,
             offset_date=date_offset,
             reverse=True,
         )
-
-        conversation: t.List[str] = []
 
         async for message in messages:
             # ignore a message without text
@@ -200,9 +200,9 @@ class TeleGptApplication:
             # make the next line for LLM
             conversation_line: str
             if message_author:
-                conversation_line = f'"{message_author}" to "{original_author}": {message_text}'
+                conversation_line = f'"{message_author}" replies to "{original_author}": {message_text}'
             else:
-                conversation_line = f'"{message_author}" to everyone: {message_text}'
+                conversation_line = f'"{message_author}" says to everyone: {message_text}'
 
             # make the collection of lines
             conversation.append(conversation_line)
