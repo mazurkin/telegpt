@@ -22,6 +22,13 @@ class TeleGptApplication:
 
     LLM_MODEL: str = 'gemini-1.5-pro'
 
+    SYSTEM_PROMPT: str = """
+    You are the expert who analyses conversation between friends.
+    You will be questioned with questions.
+    You have to answer every question in the most detailed way quoting the original text from the conversation.
+    Answer all questions in English language.
+    """
+
     def __init__(self):
         # moment when the application has started
         self.started: datetime.datetime = datetime.datetime.now(tz=self.TIMEZONE)
@@ -233,8 +240,6 @@ class TeleGptApplication:
         query = prompt_text.format(content=content)
 
         model = genai.GenerativeModel(self.LLM_MODEL)
-
-        print(query)
 
         response = model.generate_content(query, safety_settings='BLOCK_NONE')
 
