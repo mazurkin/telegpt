@@ -241,7 +241,14 @@ class TeleGptApplication:
 
         model = genai.GenerativeModel(self.LLM_MODEL)
 
-        response = model.generate_content(query, safety_settings='BLOCK_NONE')
+        response = model.generate_content(
+            query,
+            safety_settings='BLOCK_NONE',
+            generation_config=genai.GenerationConfig(
+                max_output_tokens=16384,
+                temperature=0.01,
+            )
+        )
 
         return response.text
 
