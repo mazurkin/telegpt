@@ -221,6 +221,9 @@ class TeleGptApplication:
             return 'unknown'
 
     def summarize_conversation(self, prompt_file: str, conversation: t.List[str]) -> str:
+        if not conversation:
+            return 'There is no any conversation today in the chat!'
+
         content = '\n'.join(conversation)
 
         prompt_file_path: pathlib.Path = self.pkg_dir_path.joinpath('prompt').joinpath(prompt_file)
@@ -230,6 +233,8 @@ class TeleGptApplication:
         query = prompt_text.format(content=content)
 
         model = genai.GenerativeModel(self.LLM_MODEL)
+
+        print(query)
 
         response = model.generate_content(query, safety_settings='BLOCK_NONE')
 
