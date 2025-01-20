@@ -10,7 +10,6 @@ import tzlocal
 import yaml
 import telethon
 import datetime
-import asyncio
 
 import google.generativeai as genai
 
