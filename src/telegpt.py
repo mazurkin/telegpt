@@ -152,38 +152,73 @@ class TeleGptApplication:
         conversation: t.List[str] = []
 
         async for message in messages:
+            # ignore a message without text
             if not message.text:
                 continue
+
+            # ignore a message from this tool
             if 'TELEGPT' in message.text:
                 continue
 
-            message_text = message.text.replace('\n', ' ').replace('\r', '')
-
+            # stop if this message is published the next day
             message_date: datetime.datetime = message.date.astimezone(self.TIMEZONE)
             if message_date.date() != date_offset.date():
                 break
 
-            message_author: str
-            if message.sender.first_name and message.sender.last_name:
-                message_author = message.sender.first_name + ' ' + message.sender.last_name
-            elif message.sender.first_name:
-                message_author = message.sender.first_name
-            elif message.sender.last_name:
-                message_author = message.sender.last_name
-            else:
-                message_author = str(message.sender.id)
+            # the information
+            message_author: str = self.get_message_author(message)
+            message_text: str = self.get_message_text(message)
 
+            # the original message if this message is a reply
+            original_author: t.Optional[str] = None
+            original_text: t.Optional[str] = None
+
+            if message.reply_to:
+                original = await message.get_reply_message()
+                if original:
+                    original_author = self.get_message_author(original)
+                    original_text = self.get_message_text(original)
+
+            # log the message for debug purposes
             logging.debug(
-                '%s, %s: [%s] %s',
+                '%s (%s): ["%s" to "%s"] "%s" to "%s"',
                 message.id,
                 message_date.strftime('%Y-%m-%d %H:%M:%S'),
                 message_author,
+                original_author,
                 message_text,
+                original_text,
             )
 
-            conversation.append(f'"{message_author}": {message_text}')
+            # make the next line for LLM
+            conversation_line: str
+            if message_author:
+                conversation_line = f'"{message_author}" to "{original_author}": {message_text}'
+            else:
+                conversation_line = f'"{message_author}" to everyone: {message_text}'
+
+            # make the collection of lines
+            conversation.append(conversation_line)
 
         return conversation
+
+    @staticmethod
+    def get_message_text(message) -> str:
+        return message.text.replace('\n', ' ').replace('\r', '')
+
+    @staticmethod
+    def get_message_author(message) -> str:
+        if message.sender:
+            if message.sender.first_name and message.sender.last_name:
+                return message.sender.first_name + ' ' + message.sender.last_name
+            elif message.sender.first_name:
+                return message.sender.first_name
+            elif message.sender.last_name:
+                return message.sender.last_name
+            else:
+                return str(message.sender.id)
+        else:
+            return 'unknown'
 
     def summarize_conversation(self, prompt_file: str, conversation: t.List[str]) -> str:
         content = '\n'.join(conversation)
