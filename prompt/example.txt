@@ -20,4 +20,3 @@ Question: Is there any discussion of technology or programming in this conversat
 Question: Is there any discussion of politics in any country in this conversation?
 Question: Did anyone mention any country or any city in negative context in this conversation?
 Question: Has been Hitler mentioned and who has mentioned him in this conversation?
-Question: Make a funny friendly joke which I could add to this conversation?
