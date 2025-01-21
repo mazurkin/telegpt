@@ -199,7 +199,7 @@ class TeleGptApplication:
 
             # make the next line for LLM
             conversation_line: str
-            if message_author:
+            if original_author:
                 conversation_line = f'"{message_author}" replies to "{original_author}": {message_text}'
             else:
                 conversation_line = f'"{message_author}" says to everyone: {message_text}'
