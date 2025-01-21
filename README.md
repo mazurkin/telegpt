@@ -5,6 +5,8 @@ The example of a command-line client for Telegram (this is not a Telegram bot).
 The client fetches the history of the messages from the chat for the period
 and makes the summary of conversation using LLM model.
 
+This is my [feature request](https://bugs.telegram.org/c/44288) in the Telegram's issue tracket.
+
 ## prerequisites
 
 1. Install Conda or Docker or both
