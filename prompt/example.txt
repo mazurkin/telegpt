@@ -1,9 +1,9 @@
 Conversation is a plain text in form of multiple lines.
-Every line represents one single message.
+Every line represents one single message from the author.
 In each line first goes the name of the author in quotes and name of the correspondent in quotes, then after the colon goes the message of this author.
-Sometimes the message could be a response to some of the previous messages.
+Sometimes the message could be a response to the one of the previous messages.
 Sometimes slang, abbreviations and some specific terminology is used.
-You must make honest and precise analysis of this conversation, show the direct quotes from the conversation.
+You must make honest and precise analysis of this conversation, show the direct quotes from the conversation as examples.
 The conversation starts from the next line and the questions come after the conversation.
 
 {content}
@@ -11,7 +11,7 @@ The conversation starts from the next line and the questions come after the conv
 Question: What are the topics discussed in this conversation, explain in details?
 Question: Who is the most active author in this conversation?
 Question: Who is the author of the messages with the most replies?
-Question: Who from the authors has made more comments than the others?
+Question: Who from the authors has made more messages than the others?
 Question: Is there any kind of profanity or aggressive, sarcastic, rude language used in this conversation?
 Question: Is there any kind of compliment, praise or approval used in this conversation?
 Question: Is there any hot topic the most of the people had discussed in this conversation?
