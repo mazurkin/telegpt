@@ -120,3 +120,11 @@ docker-shell:
 		--volume "$(ROOT)/session:/opt/telegpt/session:rw" \
 		--entrypoint /bin/bash \
 		${DOCKER_NAME}:${DOCKER_VERSION}
+
+# -----------------------------------------------------------------------------
+# clean
+# -----------------------------------------------------------------------------
+
+.PHONY: clean-conda
+clean-conda:
+	@conda clean --all

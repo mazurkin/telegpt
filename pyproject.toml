@@ -14,9 +14,12 @@ pyyaml = "6.0.1"
 pytz = "2024.2"
 tzlocal = "5.2"
 
-[tool.poetry.group.ai.dependencies]
+[tool.poetry.group.googleai.dependencies]
 google-generativeai = "0.8.3"
 grpcio = "1.69.0"
+
+[tool.poetry.group.openai.dependencies]
+openai = "1.61.0"
 
 [tool.poetry.group.ollama.dependencies]
 ollama = "0.4.6"
