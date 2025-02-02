@@ -1,3 +1,7 @@
+"""
+TeleGpt - AI summarizer for the telegram chats
+"""
+
 import enum
 import os
 import logging
@@ -24,7 +28,10 @@ class TeleGptAi(enum.Enum):
     Type of LLM engine
     """
 
-    # Local Ollama server
+    # return the prompt itself
+    REFLECT = 0
+
+    # Ollama local API
     OLLAMA = 1
 
     # Gemini remote API
@@ -47,12 +54,9 @@ class TeleGptApplication:
 
     MESSAGE_LIMIT: int = 1000
 
-    SYSTEM_PROMPT: str = """
-    You are the expert who analyses conversation between friends.
-    You will be questioned with questions.
-    You have to answer every question in the most detailed way quoting the original text from the conversation.
-    Answer all questions in English language.
-    """
+    SYSTEM_PROMPT_FILE: str = 'system.txt'
+
+    DEFAULT_PROMPT_FILE: str = 'prompt.txt'
 
     def __init__(self):
         # moment when the application has started
@@ -97,8 +101,8 @@ class TeleGptApplication:
              phone: t.Optional[str] = None,
              chat: t.Optional[str] = None,
              date: t.Optional[str] = None,
-             prompt: str = 'example.txt',
-             ai: TeleGptAi = TeleGptAi.OLLAMA,
+             ai: TeleGptAi = None,
+             prompt: str = DEFAULT_PROMPT_FILE,
              ):
         # log the arguments
         logging.info('Using arguments: %s', sys.argv)
@@ -117,6 +121,9 @@ class TeleGptApplication:
 
         if not chat:
             chat = os.environ['TELEGPT_CHAT']
+
+        if not ai:
+            ai = TeleGptAi.parse(os.environ['TELEGPT_AI'])
 
         if not date:
             date = datetime.datetime.now(tz=self.TIMEZONE).strftime('%Y-%m-%d')
@@ -253,31 +260,42 @@ class TeleGptApplication:
         else:
             return 'unknown'
 
+    def load_prompt(self, prompt_file: str) -> str:
+        prompt_file_path: pathlib.Path = self.pkg_dir_path.joinpath('prompt').joinpath(prompt_file)
+
+        with open(prompt_file_path, 'tr') as f:
+            content = f.read()
+
+        content = content.strip()
+
+        return content
+
     def summarize_conversation(self, ai: TeleGptAi, prompt_file: str, conversation: t.List[str]) -> str:
         if not conversation:
             return 'There is no any conversation today in the chat!'
 
         content = '\n'.join(conversation)
 
-        prompt_file_path: pathlib.Path = self.pkg_dir_path.joinpath('prompt').joinpath(prompt_file)
-        with open(prompt_file_path, 'tr') as f:
-            prompt_text = f.read()
+        system_text = self.load_prompt(self.SYSTEM_PROMPT_FILE)
 
-        query = prompt_text.format(content=content)
+        prompt_template = self.load_prompt(prompt_file)
+        prompt_text = prompt_template.format(content=content)
 
-        if ai == TeleGptAi.OLLAMA:
-            return self.summarize_conversation_ollama(query)
+        if ai == TeleGptAi.REFLECT:
+            return prompt_text
+        elif ai == TeleGptAi.OLLAMA:
+            return self.summarize_conversation_ollama(system_text, prompt_text)
         elif ai == TeleGptAi.GEMINI:
-            return self.summarize_conversation_gemini(query)
+            return self.summarize_conversation_gemini(system_text, prompt_text)
         elif ai == TeleGptAi.DEEPSEEK:
-            return self.summarize_conversation_deepseek(query)
+            return self.summarize_conversation_deepseek(system_text, prompt_text)
         elif ai == TeleGptAi.OPENAI:
-            return self.summarize_conversation_openai(query)
+            return self.summarize_conversation_openai(system_text, prompt_text)
         else:
             raise ValueError('Unknown AI :' + ai.name)
 
     # noinspection PyMethodMayBeStatic
-    def summarize_conversation_ollama(self, query: str) -> str:
+    def summarize_conversation_ollama(self, system: str, query: str) -> str:
         api_model: str = 'phi4:14b'
 
         options: t.Dict = {
@@ -288,19 +306,22 @@ class TeleGptApplication:
             model=api_model,
             prompt=query,
             options=options,
-            system=self.SYSTEM_PROMPT,
+            system=system,
         )
 
         return response.response
 
     # noinspection PyMethodMayBeStatic
-    def summarize_conversation_gemini(self, query: str) -> str:
+    def summarize_conversation_gemini(self, system: str, query: str) -> str:
         api_key: str = os.environ["GOOGLE_AI_KEY"]
         api_model: str = 'gemini-1.5-pro'
 
         google.generativeai.configure(api_key=api_key, transport='rest')
 
-        model = google.generativeai.GenerativeModel(api_model)
+        model = google.generativeai.GenerativeModel(
+            model_name=api_model,
+            system_instruction=system,
+        )
 
         response = model.generate_content(
             query,
@@ -314,7 +335,7 @@ class TeleGptApplication:
         return response.text
 
     # noinspection PyMethodMayBeStatic
-    def summarize_conversation_deepseek(self, query: str) -> str:
+    def summarize_conversation_deepseek(self, system: str, query: str) -> str:
         api_url: str = 'https://api.deepseek.com/chat/completions'
         api_key: str = os.environ['DEEPSEEK_API_KEY']
         api_model: str = 'deepseek-reasoner'
@@ -327,7 +348,7 @@ class TeleGptApplication:
         request_json: t.Mapping = {
             'model': api_model,
             'messages': [
-                {'role': 'system', 'content': self.SYSTEM_PROMPT},
+                {'role': 'system', 'content': system},
                 {'role': 'user', 'content': query},
             ],
             'stream': False,
@@ -352,7 +373,8 @@ class TeleGptApplication:
 
         return 'no response'
 
-    def summarize_conversation_openai(self, query: str) -> str:
+    # noinspection PyMethodMayBeStatic
+    def summarize_conversation_openai(self, system: str, query: str) -> str:
         api_key: str = os.environ['OPENAI_API_KEY']
         api_model: str = 'gpt-4o-mini'
 
@@ -362,13 +384,14 @@ class TeleGptApplication:
             model=api_model,
             temperature=0.01,
             messages=[
-                {'role': 'system', 'content': self.SYSTEM_PROMPT},
+                {'role': 'system', 'content': system},
                 {'role': 'user', 'content': query},
             ],
             stream=False,
         )
 
         return response.choices[0].message.content
+
 
 if __name__ == '__main__':
     application = TeleGptApplication()
