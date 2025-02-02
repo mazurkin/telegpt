@@ -1,7 +1,7 @@
 import abc
 
 
-class AbstractSummarizer(abc.ABC):
+class AbstractAI(abc.ABC):
     """
     Abstract summarizer
     """

@@ -1,10 +1,10 @@
 import os
 import openai
 
-from .ai import AbstractSummarizer
+from .ai import AbstractAI
 
 
-class OpenAiSummarizer(AbstractSummarizer):
+class OpenAI(AbstractAI):
 
     ENV_KEY: str = 'OPENAI_API_KEY'
 
@@ -12,10 +12,11 @@ class OpenAiSummarizer(AbstractSummarizer):
 
     TEMPERATURE: float = 0.01
 
-    def summarize(self, system: str, prompt: str) -> str:
-        api_key: str = os.environ[self.ENV_KEY]
+    def __init__(self):
+        self.api_key: str = os.environ[self.ENV_KEY]
 
-        client = openai.OpenAI(api_key=api_key)
+    def summarize(self, system: str, prompt: str) -> str:
+        client = openai.OpenAI(api_key=self.api_key)
 
         response = client.chat.completions.create(
             model=self.MODEL,

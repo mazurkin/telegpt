@@ -1,10 +1,10 @@
 import os
 import google.generativeai
 
-from .ai import AbstractSummarizer
+from .ai import AbstractAI
 
 
-class GeminiSummarizer(AbstractSummarizer):
+class GeminiAI(AbstractAI):
 
     ENV_KEY: str = 'GOOGLE_AI_KEY'
 
@@ -14,11 +14,13 @@ class GeminiSummarizer(AbstractSummarizer):
 
     MAX_TOKENS: int = 16384
 
+    TRANSPORT: str = 'rest'
+
+    def __init__(self):
+        self.api_key: str = os.environ[self.ENV_KEY]
+        google.generativeai.configure(api_key=self.api_key, transport=self.TRANSPORT)
+
     def summarize(self, system: str, prompt: str) -> str:
-        api_key: str = os.environ[self.ENV_KEY]
-
-        google.generativeai.configure(api_key=api_key, transport='rest')
-
         model = google.generativeai.GenerativeModel(
             model_name=self.MODEL,
             system_instruction=system,

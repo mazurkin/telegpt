@@ -3,10 +3,10 @@ import typing as t
 import json
 import requests
 
-from .ai import AbstractSummarizer
+from .ai import AbstractAI
 
 
-class DeepSeekSummarizer(AbstractSummarizer):
+class DeepSeekAI(AbstractAI):
 
     ENV_KEY: str = 'DEEPSEEK_API_KEY'
 
@@ -18,12 +18,15 @@ class DeepSeekSummarizer(AbstractSummarizer):
 
     MAX_TOKENS: int = 16384
 
-    def summarize(self, system: str, prompt: str) -> str:
-        api_key: str = os.environ[self.ENV_KEY]
+    TIMEOUT_SEC: int = 300
 
+    def __init__(self):
+        self.api_key: str = os.environ[self.ENV_KEY]
+
+    def summarize(self, system: str, prompt: str) -> str:
         headers: t.Mapping[str, str] = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + api_key,
+            'Authorization': 'Bearer ' + self.api_key,
         }
 
         request_json: t.Mapping = {
@@ -39,7 +42,7 @@ class DeepSeekSummarizer(AbstractSummarizer):
 
         response = requests.post(
             self.URL,
-            timeout=300,
+            timeout=self.TIMEOUT_SEC,
             headers=headers,
             data=request_text,
         )

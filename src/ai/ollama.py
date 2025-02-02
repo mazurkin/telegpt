@@ -1,17 +1,16 @@
 import typing as t
 import ollama
 
-from .ai import AbstractSummarizer
+from .ai import AbstractAI
 
 
-class OllamaSummarizer(AbstractSummarizer):
+class OllamaAI(AbstractAI):
 
     MODEL: str = 'phi4:14b'
 
     TEMPERATURE: float = 0.01
 
     def summarize(self, system: str, prompt: str) -> str:
-
         options: t.Dict = {
             'temperature': self.TEMPERATURE,
         }
