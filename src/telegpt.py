@@ -1,3 +1,4 @@
+import enum
 import os
 import logging
 import logging.config
@@ -10,8 +11,34 @@ import tzlocal
 import yaml
 import telethon
 import datetime
+import requests
+import json
 
 import ollama
+import openai
+import google.generativeai
+
+
+class TeleGptAi(enum.Enum):
+    """
+    Type of LLM engine
+    """
+
+    # Local Ollama server
+    OLLAMA = 1
+
+    # Gemini remote API
+    GEMINI = 2
+
+    # DeepSeek remote API
+    DEEPSEEK = 3
+
+    # OpenAI remote API
+    OPENAI = 4
+
+    @classmethod
+    def parse(cls, value: str) -> 'TeleGptAi':
+        return cls[value]
 
 
 class TeleGptApplication:
@@ -19,8 +46,6 @@ class TeleGptApplication:
     TIMEZONE: pytz.tzinfo = pytz.timezone(tzlocal.get_localzone_name())
 
     MESSAGE_LIMIT: int = 1000
-
-    LLM_MODEL: str = 'phi4:14b'
 
     SYSTEM_PROMPT: str = """
     You are the expert who analyses conversation between friends.
@@ -65,6 +90,7 @@ class TeleGptApplication:
     @argh.arg('--prompt', type=str, required=False, help='the name of the prompt file')
     @argh.arg('--chat', type=str, required=False, help='chat name')
     @argh.arg('--date', type=str, required=False, help='chat date (for example "2025-01-01"')
+    @argh.arg('--ai', type=TeleGptAi.parse, required=False, help='type of LLM engine')
     def main(self,
              app_id: t.Optional[int] = None,
              app_hash: t.Optional[str] = None,
@@ -72,6 +98,7 @@ class TeleGptApplication:
              chat: t.Optional[str] = None,
              date: t.Optional[str] = None,
              prompt: str = 'example.txt',
+             ai: TeleGptAi = TeleGptAi.OLLAMA,
              ):
         # log the arguments
         logging.info('Using arguments: %s', sys.argv)
@@ -95,13 +122,15 @@ class TeleGptApplication:
             date = datetime.datetime.now(tz=self.TIMEZONE).strftime('%Y-%m-%d')
 
         # fetch the conversation
+        logging.info('Requesting chat history')
         conversation: t.List[str] = self.fetch_conversation(app_id, app_hash, phone, chat, date)
 
         # summarize the conversation
-        response = self.summarize_conversation(prompt, conversation)
+        logging.info('Requesting AI summary with "%s"', ai.name)
+        response = self.summarize_conversation(ai, prompt, conversation)
 
         # log the conversation
-        logging.info('TELEGPT(chat: "%s", day: "%s"):\n\n%s', chat, date, response)
+        logging.info('TELEGPT(chat: "%s", day: "%s", ai: "%s"):\n\n%s', chat, date, ai.name, response)
 
     def fetch_conversation(self, app_id: int, app_hash: str, phone: str, chat: str, date: str) -> t.List[str]:
         client = telethon.TelegramClient(
@@ -224,7 +253,7 @@ class TeleGptApplication:
         else:
             return 'unknown'
 
-    def summarize_conversation(self, prompt_file: str, conversation: t.List[str]) -> str:
+    def summarize_conversation(self, ai: TeleGptAi, prompt_file: str, conversation: t.List[str]) -> str:
         if not conversation:
             return 'There is no any conversation today in the chat!'
 
@@ -236,12 +265,27 @@ class TeleGptApplication:
 
         query = prompt_text.format(content=content)
 
+        if ai == TeleGptAi.OLLAMA:
+            return self.summarize_conversation_ollama(query)
+        elif ai == TeleGptAi.GEMINI:
+            return self.summarize_conversation_gemini(query)
+        elif ai == TeleGptAi.DEEPSEEK:
+            return self.summarize_conversation_deepseek(query)
+        elif ai == TeleGptAi.OPENAI:
+            return self.summarize_conversation_openai(query)
+        else:
+            raise ValueError('Unknown AI :' + ai.name)
+
+    # noinspection PyMethodMayBeStatic
+    def summarize_conversation_ollama(self, query: str) -> str:
+        api_model: str = 'phi4:14b'
+
         options: t.Dict = {
             'temperature': 0.01,
         }
 
         response: ollama.ChatResponse = ollama.generate(
-            model=self.LLM_MODEL,
+            model=api_model,
             prompt=query,
             options=options,
             system=self.SYSTEM_PROMPT,
@@ -249,6 +293,82 @@ class TeleGptApplication:
 
         return response.response
 
+    # noinspection PyMethodMayBeStatic
+    def summarize_conversation_gemini(self, query: str) -> str:
+        api_key: str = os.environ["GOOGLE_AI_KEY"]
+        api_model: str = 'gemini-1.5-pro'
+
+        google.generativeai.configure(api_key=api_key, transport='rest')
+
+        model = google.generativeai.GenerativeModel(api_model)
+
+        response = model.generate_content(
+            query,
+            safety_settings='BLOCK_NONE',
+            generation_config=google.generativeai.GenerationConfig(
+                max_output_tokens=16384,
+                temperature=0.01,
+            )
+        )
+
+        return response.text
+
+    # noinspection PyMethodMayBeStatic
+    def summarize_conversation_deepseek(self, query: str) -> str:
+        api_url: str = 'https://api.deepseek.com/chat/completions'
+        api_key: str = os.environ['DEEPSEEK_API_KEY']
+        api_model: str = 'deepseek-reasoner'
+
+        headers: t.Mapping[str, str] = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + api_key,
+        }
+
+        request_json: t.Mapping = {
+            'model': api_model,
+            'messages': [
+                {'role': 'system', 'content': self.SYSTEM_PROMPT},
+                {'role': 'user', 'content': query},
+            ],
+            'stream': False,
+        }
+
+        request_text = json.dumps(request_json)
+
+        response = requests.post(
+            api_url,
+            timeout=300,
+            headers=headers,
+            data=request_text,
+        )
+
+        response.raise_for_status()
+
+        response_text = response.content
+
+        if response_text:
+            response_json = json.loads(response_text)
+            return response_json['choices'][0]['message']['content']
+
+        return 'no response'
+
+    def summarize_conversation_openai(self, query: str) -> str:
+        api_key: str = os.environ['OPENAI_API_KEY']
+        api_model: str = 'gpt-4o-mini'
+
+        client = openai.OpenAI(api_key=api_key)
+
+        response = client.chat.completions.create(
+            model=api_model,
+            temperature=0.01,
+            messages=[
+                {'role': 'system', 'content': self.SYSTEM_PROMPT},
+                {'role': 'user', 'content': query},
+            ],
+            stream=False,
+        )
+
+        return response.choices[0].message.content
 
 if __name__ == '__main__':
     application = TeleGptApplication()
