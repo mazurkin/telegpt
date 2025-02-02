@@ -11,7 +11,7 @@ import yaml
 import telethon
 import datetime
 
-import ollama
+import openai
 
 
 class TeleGptApplication:
@@ -236,18 +236,22 @@ class TeleGptApplication:
 
         query = prompt_text.format(content=content)
 
-        options: t.Dict = {
-            'temperature': 0.01,
-        }
-
-        response: ollama.ChatResponse = ollama.generate(
-            model=self.LLM_MODEL,
-            prompt=query,
-            options=options,
-            system=self.SYSTEM_PROMPT,
+        client = openai.OpenAI(
+            base_url='https://api.deepseek.com',
+            api_key=os.environ['DEEPSEEK_API_KEY'],
         )
 
-        return response.response
+        response = client.chat.completions.create(
+            model='deepseek-chat',
+            temperature=0.01,
+            messages=[
+                {'role': 'system', 'content': 'You are a helpful assistant'},
+                {'role': 'user', 'content': query},
+            ],
+            stream=False,
+        )
+
+        return response.choices[0].message.content
 
 
 if __name__ == '__main__':
