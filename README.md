@@ -16,13 +16,20 @@ This is my [feature request](https://bugs.telegram.org/c/44288) in the Telegram'
 ## environment variables
 
 ```shell
+# application
 export TELEGPT_APP_ID='your-app-id'
 export TELEGPT_APP_HASH='your-app-hash'
 ````
 
 ```shell
+# personal profile
 export TELEGPT_PHONE='your-account-phone-number'
+```
+
+```shell
+# other settings
 export TELEGPT_CHAT='chat-name'
+export TELEGPT_SUMMARIZER='GEMINI'
 ```
 
 ## conda way
