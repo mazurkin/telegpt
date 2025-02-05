@@ -109,7 +109,7 @@ class TeleGptApplication:
              phone: t.Optional[str] = None,
              chat: t.Optional[str] = None,
              date: t.Optional[str] = None,
-             summarizer: TeleGptSummarizer = TeleGptSummarizer.OLLAMA,
+             summarizer: TeleGptSummarizer = None,
              prompt: str = DEFAULT_PROMPT_FILE,
              ):
         # log the arguments

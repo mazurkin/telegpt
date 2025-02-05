@@ -45,10 +45,10 @@ make env-create
 
 ```shell
 # summary for this day
-bin/telegpt.sh --chat=mychat --prompt=example.txt
+bin/telegpt.sh --chat=mychatname --prompt=example.txt --summarizer=OLLAMA
 
 # summary for the specific day
-bin/telegpt.sh --chat=mychat --prompt=example.txt --date=2025-01-09
+bin/telegpt.sh --chat=mychatname --prompt=example.txt --summarizer=OLLAMA --date=2025-01-09
 ```
 
 ## docker way
