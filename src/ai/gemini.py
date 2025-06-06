@@ -6,9 +6,9 @@ from .ai import AbstractAI
 
 class GeminiAI(AbstractAI):
 
-    ENV_KEY: str = 'GOOGLE_AI_KEY'
+    ENV_KEY: str = 'GEMINI_API_KEY'
 
-    MODEL: str = 'gemini-1.5-pro'
+    MODEL: str = 'gemini-2.0-flash'
 
     TEMPERATURE: float = 0.01
 

@@ -6,7 +6,7 @@ from .ai import AbstractAI
 
 class OllamaAI(AbstractAI):
 
-    MODEL: str = 'phi4:14b'
+    MODEL: str = 'gemma3:12b'
 
     TEMPERATURE: float = 0.01
 
